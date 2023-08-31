@@ -70,28 +70,26 @@ async def start():
     chain = qa_bot()
     msg = cl.Message(content="Starting the bot...")
     await msg.send()
-    msg.content = "Hi, Welcome to Daniel's Bot. What is your query?"
+    msg.content = "Hi, Welcome to Medical Bot. What is your query?"
     await msg.update()
 
     cl.user_session.set("chain", chain)
 
 @cl.on_message
 async def main(message):
-   chain = cl.user_session.get("chain") 
-   cb = cl.AsyncLangchainCallbackHandler(
-       stream_final_answer=True, answer_prefix_tokens=["FINAL", "ANSWER"]
-   )
-   cb.answer_reached = True
-   res = await chain.acall(message, callbacks=[cb])
-   answer = res["result"]
-   sources = res["source_documents"]
+    chain = cl.user_session.get("chain") 
+    cb = cl.AsyncLangchainCallbackHandler(
+        stream_final_answer=True, answer_prefix_tokens=["FINAL", "ANSWER"]
+    )
+    cb.answer_reached = True
+    res = await chain.acall(message, callbacks=[cb])
+    answer = res["result"]
+    sources = res["source_documents"]
 
-   if sources:
-       source_str = "".join([f"- {source}\n" for source in sources])
-       source_str=source_str.replace(r'\n',' ')
-       answer += f"\nSources:\n{source_str}"
-   else:
-       answer += "\nNo sources found"
+    if sources:
+        answer += f"\nSources:" + str(sources)
+    else:
+        answer += "\nNo sources found"
 
-   await cl.Message(content=answer).send()
+    await cl.Message(content=answer).send()
 
